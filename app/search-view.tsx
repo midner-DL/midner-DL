@@ -5,7 +5,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReleaseCard from '@/components/release-card';
 import SearchBar from '@/components/search-bar';
 import { Button } from '@/components/ui/button';
-import { Disc3Icon, DiscAlbumIcon, UsersIcon } from 'lucide-react';
+import { Disc3Icon, DiscAlbumIcon, UsersIcon, ListMusicIcon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { FilterDataType, filterExplicit, QobuzAlbum, QobuzArtist, QobuzSearchFilters, QobuzSearchResults, QobuzTrack } from '@/lib/qobuz-dl';
 import { getTailwindBreakpoint } from '@/lib/utils';
@@ -30,6 +30,11 @@ export const filterData: FilterDataType = [
         label: "Artists",
         value: 'artists',
         icon: UsersIcon
+    },
+    {
+        label: "Playlists",
+        value: 'playlists',
+        icon: ListMusicIcon
     }
 ];
 

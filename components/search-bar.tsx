@@ -7,7 +7,7 @@ import { ArrowRightIcon, Loader2Icon, SearchIcon } from "lucide-react";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import axios from "axios";
-import { getAlbum, QobuzAlbum, QobuzSearchResults, QobuzTrack } from "@/lib/qobuz-dl";
+import { getAlbum, QobuzAlbum, QobuzSearchResults, QobuzTrack, QobuzPlaylist } from "@/lib/qobuz-dl";
 import { Skeleton } from "./ui/skeleton";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -177,7 +177,7 @@ const SearchBar = ({ onSearch, searching, setSearching, query }: { onSearch: (qu
                                     className="flex flex-col gap-2 select-none overflow-hidden"
                                 >
                                     <div className="md:grid flex md:max-h-[unset] max-h-[100%] md:pr-0 pr-2 md:grid-cols-2 gap-6 overflow-hidden">
-                                        {["albums", "tracks"].map((key, index) => (
+                                        {["albums", "tracks", "playlists"].map((key, index) => (
                                             <motion.div
                                                 key={index}
                                                 variants={{
@@ -190,8 +190,9 @@ const SearchBar = ({ onSearch, searching, setSearching, query }: { onSearch: (qu
                                                     <p className="text-sm font-semibold capitalize">{key}</p>
                                                     <p className="text-xs font-semibold text-muted-foreground capitalize">Showing {results?.[key as "albums" | "tracks"].items.slice(0, limit).length} of {results?.[key as "albums" | "tracks"].total}</p>
                                                 </div>
-                                                {results?.[key as "albums" | "tracks"].items.slice(0, limit).map((result: QobuzAlbum | QobuzTrack, index) => {
-                                                    const value = `${result.title} - ${getAlbum(result).artist.name}`;
+                                                {results?.[key as "albums" | "tracks" | "playlists"].items.slice(0, limit).map((result: QobuzAlbum | QobuzTrack | QobuzPlaylist, index) => {
+                                                    const album = getAlbum(result);
+                                                    const value = album ? `${result.title} - ${album.artist.name}` : `${(result as QobuzPlaylist).name} - ${(result as QobuzPlaylist).owner?.name || 'Unknown'}`;
                                                     
                                                     return loading ? (
                                                         <Skeleton
@@ -210,9 +211,9 @@ const SearchBar = ({ onSearch, searching, setSearching, query }: { onSearch: (qu
                                                                 visible: { opacity: 1, y: 0 },
                                                             }}
                                                             className="text-xs sm:text-sm hover:underline underline-offset-2 decoration-1 h-fit w-full truncate cursor-pointer justify-start text-muted-foreground"
-                                                            title={result.title}
+                                                            title={(result as QobuzAlbum | QobuzTrack).title || (result as QobuzPlaylist).name}
                                                         >
-                                                            {result.title}
+                                                            {(result as QobuzAlbum | QobuzTrack).title || (result as QobuzPlaylist).name}
                                                         </motion.p>
                                                     );
                                                 })}

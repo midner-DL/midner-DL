@@ -114,7 +114,17 @@ export const createDownloadJob = async (result: QobuzAlbum | QobuzTrack, setStat
                     let totalBytesDownloaded = 0;
                     setStatusBar(statusBar => ({ ...statusBar, progress: 0, description: `Fetching album art...` }));
                     const albumArtURL = await resizeImage(getFullResImageUrl(fetchedAlbumData!), settings.albumArtSize, settings.albumArtQuality);
-                    const albumArt = albumArtURL ? (await axios.get(albumArtURL, { responseType: 'arraybuffer' })).data : false;
+                    let albumArt: ArrayBuffer | false = false;
+                    if (albumArtURL) {
+                        try {
+                            const response = await axios.get(albumArtURL, { responseType: 'arraybuffer', signal });
+                            albumArt = response.data;
+                        } catch (e) {
+                            // If album art fetch fails, continue without it
+                            console.warn('Failed to fetch album art:', e);
+                            albumArt = false;
+                        }
+                    }
                     for (const [index, url] of albumUrls.entries()) {
                         if (url) {
                             const response = await axios.get(url, {
@@ -138,7 +148,7 @@ export const createDownloadJob = async (result: QobuzAlbum | QobuzTrack, setStat
                     setStatusBar(statusBar => ({ ...statusBar, progress: 0, description: `Zipping album...` }));
                     await new Promise(resolve => setTimeout(resolve, 500));
                     const zipFiles = {
-                        "cover.jpg": new Uint8Array(albumArt),
+                        ...(albumArt !== false ? { "cover.jpg": new Uint8Array(albumArt) } : {}),
                         ...trackBuffers.reduce((acc, buffer, index) => {
                             if (buffer) {
 
@@ -149,7 +159,6 @@ export const createDownloadJob = async (result: QobuzAlbum | QobuzTrack, setStat
                             return acc;
                         }, {} as { [key: string]: Uint8Array; })
                     } as { [key: string]: Uint8Array; };
-                    if (albumArt === false) delete zipFiles["cover.jpg"];
                     const zippedFile = zipSync(zipFiles, { level: 0 });
                     const zipBlob = new Blob([zippedFile as BlobPart], { type: 'application/zip' });
                     setStatusBar(prev => ({ ...prev, progress: 100 }));
