@@ -77,6 +77,7 @@ export async function applyMetadata(trackBuffer: ArrayBuffer, resultData: QobuzT
     metadata += `\nyear=${new Date(resultData.album.release_date_original).getFullYear()}`
     metadata += `\nlabel=${getAlbum(resultData).label.name}`
     metadata += `\ncopyright=${resultData.copyright}`
+    if (resultData.media_number) metadata += `\ndisc=${resultData.media_number}`;
     if (resultData.isrc) metadata += `\nisrc=${resultData.isrc}`;
     if (upc) metadata += `\nbarcode=${upc}`;
     if (resultData.track_number) metadata += `\ntrack=${resultData.track_number}`;
